@@ -10,37 +10,46 @@ import Foundation
 
 class Concentration {
     
-    var cards = [Card]()
+    private(set) var cards = [Card]()
     
-    var indexOfOneAndOnlyFaceUpCard:Int?
+    private var indexOfOneAndOnlyFaceUpCard:Int? {
+        get{
+            var foundIndex:Int?
+            for index in cards.indices {
+                if cards[index].isFaceUp {
+                    if foundIndex == nil {
+                        foundIndex = index
+                    }else{
+                        return nil
+                    }
+                }
+            }
+            return foundIndex
+        }
+        set(newValue){
+            for index in cards.indices{
+                cards[index].isFaceUp = (index == newValue)
+            }
+        }
+    }
     
     func chooseCard(at index: Int){
-        // 3 states
-        // 1). no cards faceUp
-        // 2). two cards faceUp - matched or not
-        // 3). on3 card faceUp and I choose some other card.
+        assert(cards.indices.contains(index),"Concentration.chooseCard(at: \(index): chose index not in the cards.")
         if !cards[index].isMatched {
             if let matchIndex = indexOfOneAndOnlyFaceUpCard, matchIndex != index { // se vc ja escolheu uma.
-                // check if cards match
                 if cards[matchIndex].identifier == cards[index].identifier {
                    cards[matchIndex].isMatched = true
                     cards[index].isMatched = true
                 }
                 cards[index].isFaceUp = true
-                indexOfOneAndOnlyFaceUpCard = nil
             }else {
-                // either no cards or 2 cards faceUp
-                for flipDownIndex in cards.indices {
-                    cards[flipDownIndex].isFaceUp = false
-                }
-                cards[index].isFaceUp = true
                 indexOfOneAndOnlyFaceUpCard = index
             }
         }
-        
     }
     
     init(numberOfPairsOfCards: Int){
+        assert(numberOfPairsOfCards > 0, "Concentration.init(\(numberOfPairsOfCards)): you must have at least on pair of cards.")
         for _ in 1...numberOfPairsOfCards{
             let card = Card()
             cards += [card,card]
